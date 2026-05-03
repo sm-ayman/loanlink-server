@@ -504,6 +504,30 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
+// Get recent applications for activity feed
+const getRecentApplications = async (req, res) => {
+  try {
+    const applications = await LoanApplication.find()
+      .populate('userId', 'name email')
+      .populate('loanId', 'title category')
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    res.json({
+      success: true,
+      data: {
+        applications
+      }
+    });
+  } catch (error) {
+    console.error('Get recent applications error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error getting recent applications'
+    });
+  }
+};
+
 module.exports = {
   submitApplication,
   getMyApplications,
@@ -514,5 +538,6 @@ module.exports = {
   rejectApplication,
   cancelApplication,
   getApplicationDetails,
-  getDashboardStats
+  getDashboardStats,
+  getRecentApplications
 };
