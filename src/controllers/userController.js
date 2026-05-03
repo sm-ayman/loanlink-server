@@ -156,24 +156,20 @@ const deleteUser = async (req, res) => {
       });
     }
 
-    // Don't allow deleting admin users
-    if (user.role === 'admin') {
-      return res.status(403).json({
+    // Don't allow admins to delete themselves
+    if (user._id.toString() === req.user._id.toString()) {
+      return res.status(400).json({
         success: false,
-        message: 'Cannot delete admin users'
+        message: 'You cannot delete your own admin account'
       });
     }
 
-    // Soft delete by suspending
-    user.isSuspended = true;
-    user.suspendReason = 'Account deleted by administrator';
-    user.suspendFeedback = 'Account has been permanently suspended';
-
-    await user.save();
+    // Hard delete user from database
+    await User.findByIdAndDelete(id);
 
     res.json({
       success: true,
-      message: 'User account suspended successfully'
+      message: 'User account permanently deleted successfully'
     });
   } catch (error) {
     console.error('Delete user error:', error);
