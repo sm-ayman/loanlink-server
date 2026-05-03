@@ -348,6 +348,50 @@ const getMyLoans = async (req, res) => {
   }
 };
 
+// Duplicate a loan (Manager/Admin only)
+const duplicateLoan = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const originalLoan = await Loan.findById(id);
+    
+    if (!originalLoan) {
+      return res.status(404).json({
+        success: false,
+        message: 'Original loan not found'
+      });
+    }
+
+    const duplicatedLoan = new Loan({
+      title: `${originalLoan.title} (Copy)`,
+      description: originalLoan.description,
+      category: originalLoan.category,
+      interestRate: originalLoan.interestRate,
+      maxLoanLimit: originalLoan.maxLoanLimit,
+      requiredDocuments: originalLoan.requiredDocuments,
+      emiPlans: originalLoan.emiPlans,
+      images: [], // Don't copy images to avoid file management complexity
+      createdBy: req.user._id,
+      showOnHome: false
+    });
+
+    await duplicatedLoan.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Loan duplicated successfully',
+      data: {
+        loan: duplicatedLoan
+      }
+    });
+  } catch (error) {
+    console.error('Duplicate loan error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error duplicating loan'
+    });
+  }
+};
+
 module.exports = {
   getAllLoans,
   getHomeLoans,
@@ -355,5 +399,6 @@ module.exports = {
   createLoan,
   updateLoan,
   deleteLoan,
-  getMyLoans
+  getMyLoans,
+  duplicateLoan
 };
