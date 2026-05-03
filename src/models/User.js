@@ -1,3 +1,8 @@
+/**
+ * User Model
+ * Defines the schema for LoanLink users, including roles (Borrower, Manager, Admin, Super-Admin)
+ * and suspension status for administrative control.
+ */
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
