@@ -188,6 +188,9 @@ const registerFromFirebase = async (req, res) => {
   try {
     const { uid, email, name, photoURL, role } = req.body;
 
+    // SECURITY: Prevent registration as admin
+    const finalRole = (role === 'admin') ? 'borrower' : (role || 'borrower');
+
     // Check if user already exists
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
@@ -215,7 +218,7 @@ const registerFromFirebase = async (req, res) => {
       name: name || 'User',
       email: email.toLowerCase(),
       password: uid, // Use Firebase UID as password (will be hashed)
-      role: role || 'borrower',
+      role: finalRole,
       photoURL: photoURL || ''
     });
 
