@@ -9,7 +9,8 @@ const {
   approveApplication,
   rejectApplication,
   cancelApplication,
-  getApplicationDetails
+  getApplicationDetails,
+  getDashboardStats
 } = require('../controllers/applicationController');
 
 const { validateLoanApplication } = require('../middleware/validation');
@@ -31,6 +32,9 @@ router.put('/:id/reject', authorize('manager'), rejectApplication);
 
 // Admin routes
 router.get('/all', authorize('admin'), getAllApplications);
+
+// Shared routes for stats (Managers and Admins)
+router.get('/stats', authorize('manager', 'admin'), getDashboardStats);
 
 // Shared routes (borrower, manager, admin can view details based on permissions)
 router.get('/:id', getApplicationDetails);
