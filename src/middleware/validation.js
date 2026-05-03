@@ -114,15 +114,15 @@ const validateLoanApplication = [
     .trim()
     .isLength({ min: 2, max: 50 })
     .withMessage('First name must be between 2 and 50 characters')
-    .matches(/^[a-zA-Z\s]+$/)
-    .withMessage('First name can only contain letters and spaces'),
+    .matches(/^[a-zA-Z0-9\s.\-']+$/)
+    .withMessage('First name can only contain letters, numbers, spaces, dots, hyphens and apostrophes'),
 
   body('lastName')
     .trim()
     .isLength({ min: 2, max: 50 })
     .withMessage('Last name must be between 2 and 50 characters')
-    .matches(/^[a-zA-Z\s]+$/)
-    .withMessage('Last name can only contain letters and spaces'),
+    .matches(/^[a-zA-Z0-9\s.\-']+$/)
+    .withMessage('Last name can only contain letters, numbers, spaces, dots, hyphens and apostrophes'),
 
   body('contactNumber')
     .matches(/^\+?[\d\s\-\(\)]+$/)
