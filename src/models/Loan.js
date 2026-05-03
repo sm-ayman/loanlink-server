@@ -69,12 +69,12 @@ loanSchema.index({ interestRate: 1 });
 
 // Virtual for formatted interest rate
 loanSchema.virtual('formattedInterestRate').get(function() {
-  return `${this.interestRate}%`;
+  return this.interestRate != null ? `${this.interestRate}%` : '';
 });
 
 // Virtual for formatted max loan limit
 loanSchema.virtual('formattedMaxLimit').get(function() {
-  return `$${this.maxLoanLimit.toLocaleString()}`;
+  return this.maxLoanLimit != null ? `$${this.maxLoanLimit.toLocaleString()}` : '';
 });
 
 // Ensure virtual fields are serialised
