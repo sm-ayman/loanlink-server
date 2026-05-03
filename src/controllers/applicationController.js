@@ -465,6 +465,45 @@ const getApplicationDetails = async (req, res) => {
   }
 };
 
+// Get dashboard stats for charts
+const getDashboardStats = async (req, res) => {
+  try {
+    const counts = await LoanApplication.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const stats = {
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+      total: 0
+    };
+
+    counts.forEach(item => {
+      if (stats.hasOwnProperty(item._id)) {
+        stats[item._id] = item.count;
+      }
+      stats.total += item.count;
+    });
+
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    console.error('Get dashboard stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error getting dashboard stats'
+    });
+  }
+};
+
 module.exports = {
   submitApplication,
   getMyApplications,
@@ -474,5 +513,6 @@ module.exports = {
   approveApplication,
   rejectApplication,
   cancelApplication,
-  getApplicationDetails
+  getApplicationDetails,
+  getDashboardStats
 };
