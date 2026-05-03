@@ -7,7 +7,8 @@ const {
   createLoan,
   updateLoan,
   deleteLoan,
-  getMyLoans
+  getMyLoans,
+  duplicateLoan
 } = require('../controllers/loanController');
 
 const { validateLoan } = require('../middleware/validation');
@@ -27,6 +28,7 @@ router.use(authenticate);
 
 router.post('/', authorize('manager', 'admin'), uploadLoanImages, handleMulterError, validateLoan, createLoan);
 router.put('/:id', authorize('manager', 'admin'), uploadLoanImages, handleMulterError, validateLoan, updateLoan);
+router.post('/:id/duplicate', authorize('manager', 'admin'), duplicateLoan);
 router.delete('/:id', authorize('manager', 'admin'), deleteLoan);
 
 module.exports = router;
