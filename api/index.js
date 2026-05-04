@@ -1,7 +1,9 @@
 require('dotenv').config();
+const express = require('express');
 const mongoose = require('mongoose');
-const app = require('../src/app');
+const mainApp = require('../src/app');
 
+const app = express();
 let isConnected = false;
 
 const connectToDatabase = async () => {
@@ -10,7 +12,7 @@ const connectToDatabase = async () => {
   }
 
   try {
-    console.log("Connecting to MongoDB...");
+    console.log("Connecting to MongoDB in Serverless...");
     const db = await mongoose.connect(process.env.MONGODB_URI, {
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 5000, // Fail fast if DB cannot be reached
@@ -20,16 +22,25 @@ const connectToDatabase = async () => {
     console.log("✅ MongoDB successfully connected in Vercel!");
   } catch (error) {
     console.error("❌ MongoDB connection failed:", error.message);
-    console.error("Please check if you have whitelisted Vercel IPs (0.0.0.0/0) in MongoDB Atlas Network Access.");
     throw error;
   }
 };
 
-module.exports = async (req, res) => {
+app.use(async (req, res, next) => {
   try {
     await connectToDatabase();
-    return app(req, res);
+    next();
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Database connection failed', error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Database connection failed', 
+      error: error.message,
+      suggestion: 'Ensure Vercel IP (0.0.0.0/0) is whitelisted in MongoDB Atlas Network Access.'
+    });
   }
-};
+});
+
+// Pass the request to the main application routes
+app.use(mainApp);
+
+module.exports = app;
