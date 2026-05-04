@@ -3,6 +3,10 @@ const jwt = require('jsonwebtoken');
 
 // Generate JWT token
 const generateToken = (userId) => {
+  if (!process.env.JWT_SECRET) {
+    console.error('CRITICAL ERROR: JWT_SECRET is not defined in environment variables!');
+    throw new Error('Server configuration error: JWT_SECRET is missing');
+  }
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d'
   });
@@ -128,7 +132,7 @@ const login = async (req, res) => {
     console.error('Login error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error during login'
+      message: error.message || 'Server error during login'
     });
   }
 };
