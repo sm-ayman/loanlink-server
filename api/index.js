@@ -21,13 +21,15 @@ const connectToDatabase = async () => {
   } catch (error) {
     console.error("❌ MongoDB connection failed:", error.message);
     console.error("Please check if you have whitelisted Vercel IPs (0.0.0.0/0) in MongoDB Atlas Network Access.");
+    throw error;
   }
 };
 
-// Middleware to ensure DB connection is ready before processing requests
-app.use(async (req, res, next) => {
-  await connectToDatabase();
-  next();
-});
-
-module.exports = app;
+module.exports = async (req, res) => {
+  try {
+    await connectToDatabase();
+    return app(req, res);
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Database connection failed', error: error.message });
+  }
+};

@@ -3,18 +3,9 @@ const path = require('path');
 const fs = require('fs');
 
 // Ensure uploads directory exists
-// In Vercel/serverless environments, the file system is read-only except for /tmp
-const isServerless = process.env.VERCEL || process.env.NODE_ENV === 'production';
-const uploadsDir = isServerless 
-  ? '/tmp/uploads' 
-  : path.join(__dirname, '../../uploads');
-
+const uploadsDir = path.join(__dirname, '../../uploads');
 if (!fs.existsSync(uploadsDir)) {
-  try {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-  } catch (err) {
-    console.error('Failed to create uploads directory:', err.message);
-  }
+  fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
 // Storage configuration
