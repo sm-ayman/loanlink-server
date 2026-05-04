@@ -166,9 +166,11 @@ const createLoan = async (req, res) => {
       maxLoanLimit: parseFloat(maxLoanLimit),
       requiredDocuments: requiredDocuments || [],
       emiPlans: emiPlans || [],
-      images: req.files ? req.files.map(file => file.filename) : [],
+      images: req.files && req.files.length > 0 
+        ? req.files.map(file => file.filename) 
+        : (Array.isArray(req.body.images) ? req.body.images : (req.body.images ? [req.body.images] : [])),
       createdBy: req.user._id,
-      showOnHome: showOnHome || false
+      showOnHome: showOnHome === 'true' || showOnHome === true
     });
 
     await loan.save();
@@ -202,9 +204,6 @@ const createLoan = async (req, res) => {
 const updateLoan = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
-
-    // Find loan
     const loan = await Loan.findById(id);
     if (!loan) {
       return res.status(404).json({
@@ -223,39 +222,53 @@ const updateLoan = async (req, res) => {
 
     // Handle new file uploads
     if (req.files && req.files.length > 0) {
-      // Delete old images
+      // Delete old local images
       if (loan.images && loan.images.length > 0) {
-        loan.images.forEach(image => deleteFile(image));
+        loan.images.forEach(image => {
+          if (!image.startsWith('http')) {
+            deleteFile(image);
+          }
+        });
       }
-
-      // Add new images
-      updateData.images = req.files.map(file => file.filename);
     }
 
-    // Update numeric fields
-    if (updateData.interestRate) {
-      updateData.interestRate = parseFloat(updateData.interestRate);
+    // Update fields from request body
+    const { title, description, category, interestRate, maxLoanLimit, showOnHome, requiredDocuments, emiPlans } = req.body;
+
+    if (title) loan.title = title;
+    if (description) loan.description = description;
+    if (category) loan.category = category.toLowerCase();
+    if (interestRate) loan.interestRate = parseFloat(interestRate);
+    if (maxLoanLimit) loan.maxLoanLimit = parseFloat(maxLoanLimit);
+    if (showOnHome !== undefined) loan.showOnHome = showOnHome === 'true' || showOnHome === true;
+    
+    if (requiredDocuments) {
+        loan.requiredDocuments = Array.isArray(requiredDocuments) ? requiredDocuments : [requiredDocuments];
     }
-    if (updateData.maxLoanLimit) {
-      updateData.maxLoanLimit = parseFloat(updateData.maxLoanLimit);
+    if (emiPlans) {
+        loan.emiPlans = Array.isArray(emiPlans) ? emiPlans : [emiPlans];
     }
 
-    // Update loan
-    Object.assign(loan, updateData);
+    // Update images
+    if (req.files && req.files.length > 0) {
+      loan.images = req.files.map(file => file.filename);
+    } else if (req.body.images) {
+        const incomingImages = Array.isArray(req.body.images) ? req.body.images : [req.body.images];
+        loan.images = incomingImages;
+    }
+
     await loan.save();
 
     // Populate createdBy for response
     await loan.populate('createdBy', 'name email');
 
-    res.json({
+    return res.status(200).json({
       success: true,
       message: 'Loan updated successfully',
-      data: {
-        loan
-      }
+      data: { loan }
     });
   } catch (error) {
-    console.error('Update loan error:', error);
+    console.error('Error in updateLoan:', error);
 
     // Clean up uploaded files if update fails
     if (req.files) {
