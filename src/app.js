@@ -32,9 +32,23 @@ app.use((req, res, next) => {
 });
 
 // CORS configuration
-// CORS configuration
 const corsOptions = {
-  origin: [process.env.FRONTEND_URL, 'http://localhost:3000', 'http://localhost:5173'].filter(Boolean),
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      process.env.FRONTEND_URL?.replace(/\/$/, ''), // Remove trailing slash
+      'https://loanlink-client.netlify.app',
+      'http://localhost:3000',
+      'http://localhost:5173'
+    ].filter(Boolean);
+    
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked for origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
