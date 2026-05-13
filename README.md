@@ -2,6 +2,18 @@
 
 A comprehensive backend API for the LoanLink microloan management system built with Express.js, Node.js, and MongoDB.
 
+## 🔗 Live Site
+[Client Live Demo](https://loanlink-client.netlify.app/)
+
+## 🔐 Credentials for Testing
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | `admin@loanlink.com` | `admin123` |
+| **Manager** | `manager@loanlink.com` | `Manager#123` |
+
+
+
 ## 🚀 Features
 
 - **User Authentication & Authorization**: JWT-based auth with role-based access control (Admin, Manager, Borrower)
@@ -154,6 +166,7 @@ FRONTEND_URL=http://localhost:3000
 
 ### Health Check
 - `GET /api/health` - Server health status
+
 
 ## 🔐 User Roles & Permissions
 
